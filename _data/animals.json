@@ -1,0 +1,90 @@
+[
+  {
+    "nombre": "Nora",
+    "especie": "gato",
+    "energia": 60,
+    "nivel": 4,
+    "posicion": [
+      1,
+      6
+    ],
+    "rescatado": false
+  },
+  {
+    "nombre": "Luna",
+    "especie": "perro",
+    "energia": 77,
+    "nivel": 3,
+    "posicion": [
+      0,
+      9
+    ],
+    "rescatado": false
+  },
+  {
+    "nombre": "Lili",
+    "especie": "gato",
+    "energia": 61,
+    "nivel": 2,
+    "posicion": [
+      2,
+      9
+    ],
+    "rescatado": false
+  },
+  {
+    "nombre": "Nina",
+    "especie": "perro",
+    "energia": 65,
+    "nivel": 5,
+    "posicion": [
+      3,
+      7
+    ],
+    "rescatado": false
+  },
+  {
+    "nombre": "Nora",
+    "especie": "gato",
+    "energia": 83,
+    "nivel": 3,
+    "posicion": [
+      7,
+      0
+    ],
+    "rescatado": false
+  },
+  {
+    "nombre": "Luna",
+    "especie": "perro",
+    "energia": 80,
+    "nivel": 1,
+    "posicion": [
+      0,
+      1
+    ],
+    "rescatado": false
+  },
+  {
+    "nombre": "Nora",
+    "especie": "gato",
+    "energia": 61,
+    "nivel": 5,
+    "posicion": [
+      1,
+      2
+    ],
+    "rescatado": false
+  },
+  {
+    "nombre": "Bowie",
+    "especie": "perro",
+    "energia": 87,
+    "nivel": 1,
+    "posicion": [
+      7,
+      7
+    ],
+    "rescatado": false
+  }
+]

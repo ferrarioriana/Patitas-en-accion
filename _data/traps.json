@@ -1,0 +1,28 @@
+[
+  {
+    "nombre": "Spike",
+    "tipo": "spike",
+    "daño": 1,
+    "posicion": [
+      0,
+      0
+    ],
+    "visible": true,
+    "activo": false,
+    "dx": 0,
+    "dy": 0
+  },
+  {
+    "nombre": "Pit",
+    "tipo": "pit",
+    "daño": -1,
+    "posicion": [
+      1,
+      0
+    ],
+    "visible": true,
+    "activo": false,
+    "dx": 0,
+    "dy": 0
+  }
+]
