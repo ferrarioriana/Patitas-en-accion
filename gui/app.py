@@ -22,6 +22,9 @@ COL_TREE_LIGHT = "#A5D6A7"
 COL_TRUNK = "#8D6E63"
 COL_FLOWER_PETAL = "#F9B4C4"
 COL_FLOWER_CENTER = "#FFD166"
+COL_PAW = "#7BC96F"
+COL_PAW_ACCENT = "#5C8A57"
+COL_SHADOW = "#E7D1B0"
 
 TITLE_FONT = ("Helvetica", 28, "bold")
 HUD_FONT   = ("Helvetica", 14)
@@ -94,9 +97,13 @@ class App(tk.Tk):
 
         # Animación (fase global)
         self._anim_phase = 0.0
+        self._monster_spawn_job: int | None = None
+        self._monster_move_job: int | None = None
+        self._monster_timer_started = False
 
         # Cargar sprites de animales (PNG con fondo transparente)
         self._load_animal_images()
+        self._load_player_assets()
         # asignación de sprite por nombre (para que no cambie al redibujar)
         self._sprite_idx: dict[str, int] = {}
 
@@ -178,6 +185,29 @@ class App(tk.Tk):
                         print(f"[WARN] No se pudo cargar {p}: {e}")
         # Si no hay imágenes, luego usaremos fallback vectorial.
 
+    def _load_player_assets(self):
+        """Carga sprites opcionales del jugador/monstruo."""
+        self.player_sprite = None
+        self.monster_sprite = None
+        root = Path(__file__).resolve().parents[1]
+        player_dir = root / "assets" / "player"
+        if not player_dir.exists():
+            return
+        player_png = player_dir / "player.png"
+        monster_png = player_dir / "monster.png"
+        try:
+            if player_png.exists():
+                self.player_sprite = tk.PhotoImage(file=str(player_png))
+        except Exception as exc:
+            print(f"[WARN] No se pudo cargar {player_png}: {exc}")
+            self.player_sprite = None
+        try:
+            if monster_png.exists():
+                self.monster_sprite = tk.PhotoImage(file=str(monster_png))
+        except Exception as exc:
+            print(f"[WARN] No se pudo cargar {monster_png}: {exc}")
+            self.monster_sprite = None
+
     def _sprite_for(self, nombre: str, especie: str):
         """Retorna la PhotoImage asignada a este animal, o None si no hay."""
         if not self.sprites.get(especie):
@@ -186,20 +216,40 @@ class App(tk.Tk):
             self._sprite_idx[nombre] = random.randrange(len(self.sprites[especie]))
         return self.sprites[especie][self._sprite_idx[nombre]]
 
+    def _draw_paw_placeholder(self, cx:int, cy:int):
+        """Fallback minimalista en caso de que falten sprites."""
+        base_r = 10
+        toe_r = 6
+        offsets = [(-8, -10), (0, -12), (8, -10), (0, 0)]
+        for dx, dy in offsets[:-1]:
+            self.canvas.create_oval(
+                cx + dx - toe_r, cy + dy - toe_r,
+                cx + dx + toe_r, cy + dy + toe_r,
+                fill=COL_PAW, outline="", tags=("obj","anim_animal")
+            )
+        dx, dy = offsets[-1]
+        self.canvas.create_oval(
+            cx + dx - base_r, cy + dy - base_r,
+            cx + dx + base_r, cy + dy + base_r,
+            fill=COL_PAW_ACCENT, outline="", tags=("obj","anim_animal")
+        )
+
     # ---------- Decor helpers ----------
     def _build_decor(self):
-        cx = MAP_W // 2
-        self.path_cells = {(cx, y) for y in range(MAP_H)}
-        for y in range(2, MAP_H, 4):
-            self.path_cells.add((min(MAP_W-1, cx+1), y))
-        for y in range(4, MAP_H, 6):
-            self.path_cells.add((max(0, cx-1), y))
-        ocupadas = {a.posicion for a in self.engine.animales} | {i.posicion for i in self.engine.items} | {t.posicion for t in self.engine.trampas}
-        libres = [(x,y) for x in range(MAP_W) for y in range(MAP_H)
-                  if (x,y) not in self.path_cells and (x,y) not in ocupadas]
-        random.shuffle(libres)
-        self.tree_cells = set(libres[:10])
-        self.flower_cells = set(libres[10:18])  # 8 flores
+        """Usa el layout calculado por el engine para mantener coherencia."""
+        if self.engine.path_cells:
+            self.path_cells = set(self.engine.path_cells)
+        else:
+            cx = MAP_W // 2
+            self.path_cells = {(cx, y) for y in range(MAP_H)}
+        if self.engine.tree_cells:
+            self.tree_cells = set(self.engine.tree_cells)
+        else:
+            self.tree_cells = set()
+        if self.engine.flower_cells:
+            self.flower_cells = set(self.engine.flower_cells)
+        else:
+            self.flower_cells = set()
 
     # ---------- Mostrar/Ocultar CRUD ----------
     def _toggle_crud(self):
@@ -255,40 +305,100 @@ class App(tk.Tk):
                 self.canvas.create_text(x*CELL+CELL//2, y*CELL+CELL//2,
                                         text="☠" if t.tipo=="pit" else "✖", tags=("obj","anim_trap"))
 
-        # Mascotas con PNG o fallback
+        # Mascotas con PNG kawaii (solo la activa)
         for a in self.engine.animales:
+            if a.rescatado or a.is_dead():
+                continue
             x, y = a.posicion
+            cx = x*CELL + CELL//2
+            cy = y*CELL + CELL//2
+            # sombra suave para dar profundidad
+            self.canvas.create_oval(
+                cx-14, y*CELL+CELL-14, cx+14, y*CELL+CELL-6,
+                fill=COL_SHADOW, outline="", tags=("obj","anim_shadow")
+            )
             img = self._sprite_for(a.nombre, "gato" if a.especie == "gato" else "perro")
             if img:
-                # Centrado dentro de la celda
-                cx = x*CELL + CELL//2
-                cy = y*CELL + CELL//2
                 self.canvas.create_image(cx, cy, image=img, tags=("obj","anim_animal"), anchor="c")
             else:
-                # Fallback vectorial (por si no hay imagen)
-                color = COL_ANIM if not a.rescatado else COL_ANIM_RES
-                self.canvas.create_rectangle(x*CELL+10, y*CELL+10, x*CELL+CELL-10, y*CELL+CELL-10,
-                                             outline="", fill=color, tags=("obj","anim_animal"))
-                ch = "G" if a.especie == "gato" else "P"
-                self.canvas.create_text(x*CELL+CELL//2, y*CELL+CELL//2, text=ch, tags=("obj","anim_animal"))
+                self._draw_paw_placeholder(cx, cy)
 
         # Jugador
         x,y = self.engine.jugador.posicion
-        self.canvas.create_polygon(
-            x*CELL+CELL//2, y*CELL+12, x*CELL+12, y*CELL+CELL-12, x*CELL+CELL-12, y*CELL+CELL-12,
-            fill=COL_PLAYER, outline="", tags=("obj","anim_player")
-        )
+        cx, cy = x*CELL + CELL//2, y*CELL + CELL//2
+        if self.player_sprite:
+            self.canvas.create_image(cx, cy, image=self.player_sprite, tags=("obj","anim_player"), anchor="c")
+        else:
+            head_r = 12
+            body_w = CELL//3
+            body_h = CELL//2
+            # cabeza
+            self.canvas.create_oval(
+                cx-head_r, y*CELL+10, cx+head_r, y*CELL+10+head_r*2,
+                fill="#5B5F97", outline="", tags=("obj","anim_player")
+            )
+            # cuerpo
+            self.canvas.create_rectangle(
+                cx-body_w//2, y*CELL+20, cx+body_w//2, y*CELL+20+body_h,
+                fill="#F45D5D", outline="", tags=("obj","anim_player")
+            )
+            # piernas
+            leg_y = y*CELL+20+body_h
+            self.canvas.create_rectangle(
+                cx-body_w//2, leg_y, cx-body_w//2+6, leg_y+18, fill="#5B5F97", outline="", tags=("obj","anim_player")
+            )
+            self.canvas.create_rectangle(
+                cx+body_w//2-6, leg_y, cx+body_w//2, leg_y+18, fill="#5B5F97", outline="", tags=("obj","anim_player")
+            )
+
+        # Monstruo perseguidor
+        if self.engine.monster_active and self.engine.monster_pos:
+            mx, my = self.engine.monster_pos
+            mcx, mcy = mx*CELL + CELL//2, my*CELL + CELL//2
+            if self.monster_sprite:
+                self.canvas.create_image(mcx, mcy, image=self.monster_sprite, tags=("obj","anim_monster"), anchor="c")
+            else:
+                self.canvas.create_oval(
+                    mcx-18, mcy-18, mcx+18, mcy+18, fill="#6D2E46", outline="", tags=("obj","anim_monster")
+                )
+                self.canvas.create_text(mcx, mcy, text="👾", tags=("obj","anim_monster"))
 
     # ---------- Movimiento ----------
     def _move(self, dx:int, dy:int):
         self.engine.mover_jugador(dx, dy)
+        if (not self._monster_timer_started and not self.engine.game_over and
+                self.engine.first_move_done):
+            self._monster_timer_started = True
+            self._monster_spawn_job = self.after(5000, self._activate_monster)
         self._draw_world()
+        if self.engine.game_over:
+            self._handle_game_over()
+
+    def _activate_monster(self):
+        self._monster_spawn_job = None
+        if self.engine.game_over:
+            return
+        spawned = self.engine.spawn_monster()
+        self._draw_world()
+        if spawned and not self.engine.game_over:
+            self._monster_move_job = self.after(500, self._monster_step_loop)
+
+    def _monster_step_loop(self):
+        if self.engine.game_over or not self.engine.monster_active:
+            return
+        self.engine.monster_step()
+        self._draw_world()
+        if self.engine.game_over:
+            self._handle_game_over()
+            return
+        self._monster_move_job = self.after(500, self._monster_step_loop)
 
     # ---------- Sidebar/HUD ----------
     def _refresh_sidebar(self):
         self.lbl_pts.config(text=f"🟡 {self.engine.jugador.puntuacion}")
         self.lbl_life.config(text=f"❤️ Vidas: {self.engine.jugador.vidas}")
-        self.lbl_resc.config(text=f"🐾 Por rescatar: {sum(1 for a in self.engine.animales if not a.rescatado)}")
+        activos = sum(1 for a in self.engine.animales if not a.rescatado and not a.is_dead())
+        self.lbl_resc.config(text=f"🐾 Por rescatar: {activos}")
         self.inv_box.set_items(self.engine.jugador.inventario)
         if self.engine.game_over:
             self._handle_game_over(); return
@@ -297,6 +407,12 @@ class App(tk.Tk):
     def _handle_game_over(self):
         if getattr(self, "_game_over_shown", False): return
         self._game_over_shown = True
+        if self._monster_spawn_job:
+            self.after_cancel(self._monster_spawn_job)
+            self._monster_spawn_job = None
+        if self._monster_move_job:
+            self.after_cancel(self._monster_move_job)
+            self._monster_move_job = None
         messagebox.showerror("Game Over", "¡Perdiste! 😢")
         self.unbind("<Up>"); self.unbind("<Down>"); self.unbind("<Left>"); self.unbind("<Right>")
 
@@ -331,6 +447,8 @@ class App(tk.Tk):
             self.canvas.move(tag, 0, -bounce)
         for tag in self.canvas.find_withtag("anim_player"):
             self.canvas.move(tag, 0, -bounce)
+        for tag in self.canvas.find_withtag("anim_monster"):
+            self.canvas.move(tag, 0, -max(1, bounce//2))
 
         # borde de troncos del inventario
         self.inv_box.animate()

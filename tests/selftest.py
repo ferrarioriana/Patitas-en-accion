@@ -23,19 +23,26 @@ def test_spawn_nueva_mascota(base: Path):
     j = Jugador(nombre="Tester", posicion=(0,0))
     eng = GameEngine(j, remaining_time=30)
     eng.mover_jugador(0,0)  # recoge comida
-    prev = len(eng.animales)
     eng.mover_jugador(1,0)  # rescate -> debe spawnear
-    assert len(eng.animales) > prev, "Debe haberse spawneado una nueva mascota"
+    activos_post = sum(1 for a in eng.animales if not a.rescatado and not a.is_dead())
+    assert activos_post == 0, "Luego de rescatar no debe quedar mascota activa"
+    eng.tick(1)
+    activos_nuevos = sum(1 for a in eng.animales if not a.rescatado and not a.is_dead())
+    assert activos_nuevos == 1, "Debe aparecer una nueva mascota tras 1 segundo"
 
 def test_trampas_vida_y_pit(base: Path):
     reset_data(base)
     from data.storage import guardar_animales, guardar_items, guardar_trampas
     guardar_animales([]); guardar_items([])
-    guardar_trampas([Trap(nombre="Spike", tipo="spike", daño=1, posicion=(0,0)),
-                     Trap(nombre="Pit",   tipo="pit",   daño=-1, posicion=(1,0))])
+    guardar_trampas([
+        Trap(nombre="Spike", tipo="spike", daño=1, posicion=(0,0)),
+        Trap(nombre="Pit",   tipo="pit",   daño=-1, posicion=(1,0)),
+        Trap(nombre="Pit-2", tipo="pit",   daño=-1, posicion=(2,0)),
+    ])
     j = Jugador(nombre="Tester", posicion=(0,0))
     eng = GameEngine(j, remaining_time=30)
     eng.mover_jugador(0,0); assert j.vidas == 2
+    eng.mover_jugador(1,0); assert j.vidas == 1 and not eng.game_over
     eng.mover_jugador(1,0); assert eng.game_over or j.vidas == 0
 
 def test_tiempo_game_over(base: Path):

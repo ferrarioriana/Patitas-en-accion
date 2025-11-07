@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "nombre": "Comida+3",
+    "tipo": "comida",
+    "poder": 3,
+    "posicion": [
+      6,
+      6
+    ]
+  },
+  {
+    "nombre": "Comida+7",
+    "tipo": "comida",
+    "poder": 7,
+    "posicion": [
+      0,
+      2
+    ]
+  },
+  {
+    "nombre": "Comida+5",
+    "tipo": "comida",
+    "poder": 5,
+    "posicion": [
+      1,
+      7
+    ]
+  },
+  {
+    "nombre": "Comida+4",
+    "tipo": "comida",
+    "poder": 4,
+    "posicion": [
+      9,
+      1
+    ]
+  }
+]

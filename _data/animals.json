@@ -1,89 +1,144 @@
 [
   {
-    "nombre": "Nora",
-    "especie": "gato",
-    "energia": 60,
-    "nivel": 4,
-    "posicion": [
-      1,
-      6
-    ],
-    "rescatado": false
-  },
-  {
-    "nombre": "Luna",
+    "nombre": "Kira",
     "especie": "perro",
-    "energia": 77,
-    "nivel": 3,
-    "posicion": [
-      0,
-      9
-    ],
-    "rescatado": false
-  },
-  {
-    "nombre": "Lili",
-    "especie": "gato",
-    "energia": 61,
+    "energia": 83,
     "nivel": 2,
     "posicion": [
-      2,
-      9
-    ],
-    "rescatado": false
-  },
-  {
-    "nombre": "Nina",
-    "especie": "perro",
-    "energia": 65,
-    "nivel": 5,
-    "posicion": [
-      3,
-      7
-    ],
-    "rescatado": false
-  },
-  {
-    "nombre": "Nora",
-    "especie": "gato",
-    "energia": 83,
-    "nivel": 3,
-    "posicion": [
-      7,
+      8,
       0
     ],
-    "rescatado": false
+    "rescatado": true
   },
   {
-    "nombre": "Luna",
+    "nombre": "Max",
     "especie": "perro",
-    "energia": 80,
-    "nivel": 1,
-    "posicion": [
-      0,
-      1
-    ],
-    "rescatado": false
-  },
-  {
-    "nombre": "Nora",
-    "especie": "gato",
-    "energia": 61,
+    "energia": 52,
     "nivel": 5,
     "posicion": [
-      1,
+      5,
+      3
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Max",
+    "especie": "gato",
+    "energia": 52,
+    "nivel": 5,
+    "posicion": [
+      8,
       2
     ],
-    "rescatado": false
+    "rescatado": true
+  },
+  {
+    "nombre": "Rita",
+    "especie": "perro",
+    "energia": 85,
+    "nivel": 5,
+    "posicion": [
+      0,
+      8
+    ],
+    "rescatado": true
   },
   {
     "nombre": "Bowie",
-    "especie": "perro",
+    "especie": "gato",
     "energia": 87,
+    "nivel": 4,
+    "posicion": [
+      5,
+      9
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Kira",
+    "especie": "perro",
+    "energia": 88,
+    "nivel": 5,
+    "posicion": [
+      4,
+      4
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Kira",
+    "especie": "gato",
+    "energia": 87,
+    "nivel": 3,
+    "posicion": [
+      9,
+      4
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Chispa",
+    "especie": "perro",
+    "energia": 53,
+    "nivel": 5,
+    "posicion": [
+      0,
+      6
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Kira",
+    "especie": "perro",
+    "energia": 43,
     "nivel": 1,
     "posicion": [
+      9,
+      4
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Nora",
+    "especie": "perro",
+    "energia": 69,
+    "nivel": 4,
+    "posicion": [
+      0,
+      2
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Chispa",
+    "especie": "gato",
+    "energia": 59,
+    "nivel": 5,
+    "posicion": [
       7,
+      1
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Rita",
+    "especie": "perro",
+    "energia": 43,
+    "nivel": 3,
+    "posicion": [
+      8,
       7
+    ],
+    "rescatado": true
+  },
+  {
+    "nombre": "Lili",
+    "especie": "perro",
+    "energia": 79,
+    "nivel": 4,
+    "posicion": [
+      8,
+      5
     ],
     "rescatado": false
   }
